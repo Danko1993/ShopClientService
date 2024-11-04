@@ -15,6 +15,7 @@ public class RegisterController {
     private ClientDataService clientDataService;
 
     @PostMapping
+    @CrossOrigin(origins = "http://localhost:3000")
     public ResponseEntity<String> registerClient(@RequestBody RegisterClientDto registerClientDto, BindingResult result){
         if (result.hasErrors()) {
             return clientDataService.returnValidationErrors(result);

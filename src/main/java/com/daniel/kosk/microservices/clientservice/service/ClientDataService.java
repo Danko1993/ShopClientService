@@ -1,5 +1,7 @@
 package com.daniel.kosk.microservices.clientservice.service;
 
+import com.daniel.kosk.microservices.clientservice.config.RabbitMQConfig;
+import com.daniel.kosk.microservices.clientservice.dto.ClientActivationDto;
 import com.daniel.kosk.microservices.clientservice.dto.RegisterClientDto;
 import com.daniel.kosk.microservices.clientservice.entity.ActivationToken;
 import com.daniel.kosk.microservices.clientservice.entity.Client;
@@ -30,6 +32,8 @@ public class ClientDataService {
     private NotificationProducer notificationProducer;
     @Autowired
     private ActivationTokenRepository activationTokenRepository;
+    @Autowired
+    RabbitMQConfig rabbit;
 
     @Transactional
     public ResponseEntity<String> registerClient(RegisterClientDto registerClientDto) {
@@ -41,8 +45,8 @@ public class ClientDataService {
         client.setActive(false);
         clientRepository.save(client);
         String activationLink = this.createActivationToken(client);
-        notificationProducer.sendClientActivationMessage(client.getEmail(),activationLink);
-
+        ClientActivationDto clientActivationDto = new ClientActivationDto(client.getEmail(), activationLink);
+        notificationProducer.sendNotification(rabbit.USER_SAVED_EXCHANGE, rabbit.USER_SAVED_KEY,clientActivationDto );
         return new ResponseEntity<>("User with email "+ registerClientDto.email()+" registered", HttpStatus.CREATED);
     }
 
