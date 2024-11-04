@@ -33,7 +33,7 @@ public class Client {
 
     String imagePath;
 
-    String role;
+    String roles;
 
     boolean active;
 

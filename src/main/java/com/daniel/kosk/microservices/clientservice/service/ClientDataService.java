@@ -14,6 +14,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.validation.BindingResult;
@@ -34,7 +35,9 @@ public class ClientDataService {
     @Autowired
     private ActivationTokenRepository activationTokenRepository;
     @Autowired
-    RabbitMQConfig rabbit;
+    private RabbitMQConfig rabbit;
+    @Autowired
+    private PasswordEncoder passwordEncoder;
 
     @Transactional
     public ResponseEntity<ResponseDto> registerClient(RegisterClientDto registerClientDto) {
@@ -42,8 +45,9 @@ public class ClientDataService {
             return new ResponseEntity<>(new ResponseDto("Email already registered"), HttpStatus.CONFLICT);
         }
         Client client = clientMapper.toEntity(registerClientDto);
-        client.setRole("USER");
+        client.setRoles("USER");
         client.setActive(false);
+        client.setPassword(passwordEncoder.encode(registerClientDto.password()));
         clientRepository.save(client);
         String activationLink = this.createActivationToken(client);
         ClientActivationDto clientActivationDto = new ClientActivationDto(client.getEmail(), activationLink);
@@ -55,7 +59,7 @@ public class ClientDataService {
     public ResponseEntity<ResponseDto> activateClient(String token) {
         if (activationTokenRepository.existsByToken(token)){
             ActivationToken activationToken = activationTokenRepository.findByToken(token);
-            if (activationToken.getExpires().after(new Date()) ){
+            if (activationToken.getExpires().before(new Date()) ){
                 return new ResponseEntity<>(new ResponseDto("Token is expired"), HttpStatus.CONFLICT);
             }
             Client client = activationToken.getClient();
