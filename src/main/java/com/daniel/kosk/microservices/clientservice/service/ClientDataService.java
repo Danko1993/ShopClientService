@@ -3,6 +3,7 @@ package com.daniel.kosk.microservices.clientservice.service;
 import com.daniel.kosk.microservices.clientservice.config.RabbitMQConfig;
 import com.daniel.kosk.microservices.clientservice.dto.ClientActivationDto;
 import com.daniel.kosk.microservices.clientservice.dto.RegisterClientDto;
+import com.daniel.kosk.microservices.clientservice.dto.ResponseDto;
 import com.daniel.kosk.microservices.clientservice.entity.ActivationToken;
 import com.daniel.kosk.microservices.clientservice.entity.Client;
 import com.daniel.kosk.microservices.clientservice.mapper.ClientMapper;
@@ -36,9 +37,9 @@ public class ClientDataService {
     RabbitMQConfig rabbit;
 
     @Transactional
-    public ResponseEntity<String> registerClient(RegisterClientDto registerClientDto) {
+    public ResponseEntity<ResponseDto> registerClient(RegisterClientDto registerClientDto) {
         if (clientRepository.existsByEmail(registerClientDto.email())){
-            return new ResponseEntity<>("Email already registered", HttpStatus.CONFLICT);
+            return new ResponseEntity<>(new ResponseDto("Email already registered"), HttpStatus.CONFLICT);
         }
         Client client = clientMapper.toEntity(registerClientDto);
         client.setRole("USER");
@@ -47,29 +48,29 @@ public class ClientDataService {
         String activationLink = this.createActivationToken(client);
         ClientActivationDto clientActivationDto = new ClientActivationDto(client.getEmail(), activationLink);
         notificationProducer.sendNotification(rabbit.USER_SAVED_EXCHANGE, rabbit.USER_SAVED_KEY,clientActivationDto );
-        return new ResponseEntity<>("User with email "+ registerClientDto.email()+" registered", HttpStatus.CREATED);
+        return new ResponseEntity<>(new ResponseDto("User with email "+ registerClientDto.email()+" registered"), HttpStatus.CREATED);
     }
 
     @Transactional
-    public ResponseEntity<String> activateClient(String token) {
+    public ResponseEntity<ResponseDto> activateClient(String token) {
         if (activationTokenRepository.existsByToken(token)){
             ActivationToken activationToken = activationTokenRepository.findByToken(token);
             if (activationToken.getExpires().after(new Date()) ){
-                return new ResponseEntity<>("Token is expired", HttpStatus.CONFLICT);
+                return new ResponseEntity<>(new ResponseDto("Token is expired"), HttpStatus.CONFLICT);
             }
             Client client = activationToken.getClient();
             client.setActive(true);
             clientRepository.save(client);
-            ResponseEntity<String> response = new ResponseEntity<>("Client activated", HttpStatus.OK);
+            return new ResponseEntity<>(new ResponseDto("Client activated"), HttpStatus.OK);
         }
-        return new ResponseEntity<>("Token not found", HttpStatus.CONFLICT);
+        return new ResponseEntity<>(new ResponseDto("Token not found"), HttpStatus.CONFLICT);
     }
 
 
-    public ResponseEntity<String> returnValidationErrors(BindingResult result) {
+    public ResponseEntity<ResponseDto> returnValidationErrors(BindingResult result) {
         String validationErrors = result.getAllErrors().stream()
                 .map(DefaultMessageSourceResolvable::getDefaultMessage).collect(Collectors.joining(", "));
-        return new ResponseEntity<>("Validating erros: " + validationErrors, HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>( new ResponseDto("Validating erros: " + validationErrors), HttpStatus.BAD_REQUEST);
     }
 
 

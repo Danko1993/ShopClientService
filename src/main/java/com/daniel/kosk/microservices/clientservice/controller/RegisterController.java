@@ -1,6 +1,7 @@
 package com.daniel.kosk.microservices.clientservice.controller;
 
 import com.daniel.kosk.microservices.clientservice.dto.RegisterClientDto;
+import com.daniel.kosk.microservices.clientservice.dto.ResponseDto;
 import com.daniel.kosk.microservices.clientservice.service.ClientDataService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -16,7 +17,7 @@ public class RegisterController {
 
     @PostMapping
     @CrossOrigin(origins = "http://localhost:3000")
-    public ResponseEntity<String> registerClient(@RequestBody RegisterClientDto registerClientDto, BindingResult result){
+    public ResponseEntity<ResponseDto> registerClient(@RequestBody RegisterClientDto registerClientDto, BindingResult result){
         if (result.hasErrors()) {
             return clientDataService.returnValidationErrors(result);
         }
@@ -24,7 +25,7 @@ public class RegisterController {
     }
 
     @GetMapping("/activate")
-    public ResponseEntity<String>   activateClient(@RequestParam String token){
+    public ResponseEntity<ResponseDto>   activateClient(@RequestParam String token){
         return clientDataService.activateClient(token);
     }
 
