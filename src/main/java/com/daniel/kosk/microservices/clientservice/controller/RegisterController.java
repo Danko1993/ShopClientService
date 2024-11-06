@@ -20,9 +20,18 @@ public class RegisterController {
         if (result.hasErrors()) {
             return clientDataService.returnValidationErrors(result);
         }
-        return clientDataService.registerClient(registerClientDto);
+        String role = "CLIENT";
+        return clientDataService.registerClient(registerClientDto, role);
     }
 
+    @PutMapping("/employee")
+    public ResponseEntity<ResponseDto> registerEmployee(@RequestBody RegisterClientDto registerClientDto, BindingResult result){
+        if (result.hasErrors()) {
+            return clientDataService.returnValidationErrors(result);
+        }
+        String role = "EMPLOYEE";
+        return clientDataService.registerClient(registerClientDto, role);
+    }
     @GetMapping("/activate")
     public ResponseEntity<ResponseDto>   activateClient(@RequestParam String token){
         return clientDataService.activateClient(token);

@@ -39,12 +39,12 @@ public class ClientDataService {
     private PasswordEncoder passwordEncoder;
 
     @Transactional
-    public ResponseEntity<ResponseDto> registerClient(RegisterClientDto registerClientDto) {
+    public ResponseEntity<ResponseDto> registerClient(RegisterClientDto registerClientDto, String role) {
         if (clientRepository.existsByEmail(registerClientDto.email())){
             return new ResponseEntity<>(new ResponseDto("Email already registered"), HttpStatus.CONFLICT);
         }
         Client client = clientMapper.toEntity(registerClientDto);
-        client.setRoles("USER");
+        client.setRoles(role);
         client.setActive(false);
         client.setPassword(passwordEncoder.encode(registerClientDto.password()));
         clientRepository.save(client);

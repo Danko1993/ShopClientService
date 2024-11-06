@@ -9,7 +9,7 @@
 		<relativePath/> <!-- lookup parent from repository -->
 	</parent>
 	<groupId>com.daniel.kosk.microservices</groupId>
-	<artifactId>clientService</artifactId>
+	<artifactId>userService</artifactId>
 	<version>0.0.1-SNAPSHOT</version>
 	<name>clientService</name>
 	<description>clientService</description>
