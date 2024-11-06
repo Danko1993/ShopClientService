@@ -13,7 +13,8 @@ import java.util.Map;
 import java.util.function.Function;
 @Component
 public class JwtUtil {
-    @Value("${security.jwt.secret-key}")
+
+    @Value("${security.jwt.secret-key}}")
     private String secretKey;
     public String extractUsername(String token) {
         return extractClaims(token, Claims::getSubject);

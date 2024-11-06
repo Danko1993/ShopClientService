@@ -1,11 +1,10 @@
 package com.daniel.kosk.microservices.clientservice.service;
 
 import com.daniel.kosk.microservices.clientservice.config.RabbitMQConfig;
-import com.daniel.kosk.microservices.clientservice.dto.ClientActivationDto;
-import com.daniel.kosk.microservices.clientservice.dto.RegisterClientDto;
-import com.daniel.kosk.microservices.clientservice.dto.ResponseDto;
+import com.daniel.kosk.microservices.clientservice.dto.*;
 import com.daniel.kosk.microservices.clientservice.entity.ActivationToken;
 import com.daniel.kosk.microservices.clientservice.entity.Client;
+import com.daniel.kosk.microservices.clientservice.exception.ClientNotFoundException;
 import com.daniel.kosk.microservices.clientservice.mapper.ClientMapper;
 import com.daniel.kosk.microservices.clientservice.producer.NotificationProducer;
 import com.daniel.kosk.microservices.clientservice.repository.ActivationTokenRepository;
@@ -89,5 +88,15 @@ public class ClientDataService {
         activationToken.setExpires(calendar.getTime());
         activationTokenRepository.save(activationToken);
         return "http://localhost:8081/register/activate?token="+token;
+    }
+
+    public ResponseEntity<ApiResponseDto> getClientByEmail(String email) {
+        if (clientRepository.existsByEmail(email)){
+            Client client = clientRepository.findByEmail(email);
+            return new ResponseEntity<>(clientMapper.toDto(client), HttpStatus.OK);
+        }else {
+            throw new ClientNotFoundException("Client with email "+ email +" not found");
+        }
+
     }
 }
