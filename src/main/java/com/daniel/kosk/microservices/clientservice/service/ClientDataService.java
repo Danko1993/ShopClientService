@@ -103,10 +103,28 @@ public class ClientDataService {
     public ResponseEntity<ApiResponseDto> updateClient(String email, UpdateClientDto updateClientDto) {
         if (clientRepository.existsByEmail(email)){
             Client client = clientRepository.findByEmail(email);
-            updateClientDto.getPhoneNumber().ifPresent(client::setPhoneNumber);
-            updateClientDto.getAddress().ifPresent(client::setAddress);
-            clientRepository.save(client);
-            return new ResponseEntity<>(new ResponseDto("Client data updated"), HttpStatus.OK);
+            if (updateClientDto.getPhoneNumber().isPresent()){
+              ClientUpdateMessageDto clientUpdateMessageDto = new ClientUpdateMessageDto();
+              clientUpdateMessageDto.setDataName("phone number");
+              clientUpdateMessageDto.setOldValue(client.getPhoneNumber());
+              clientUpdateMessageDto.setNewValue(updateClientDto.getPhoneNumber().get());
+              clientUpdateMessageDto.setEmail(email);
+              client.setPhoneNumber(updateClientDto.getPhoneNumber().get());
+              clientRepository.save(client);
+              notificationProducer.sendNotification(rabbit.CLIENT_UPDATE_EXCHANGE, rabbit.CLIENT_UPDATE_KEY,clientUpdateMessageDto );
+              return new ResponseEntity<>(new ResponseDto("Client data updated"), HttpStatus.OK);
+            }
+            if (updateClientDto.getAddress().isPresent()){
+                ClientUpdateMessageDto clientUpdateMessageDto = new ClientUpdateMessageDto();
+                clientUpdateMessageDto.setDataName("address");
+                clientUpdateMessageDto.setOldValue(client.getAddress());
+                clientUpdateMessageDto.setNewValue(updateClientDto.getAddress().get());
+                clientUpdateMessageDto.setEmail(email);
+                client.setPhoneNumber(updateClientDto.getAddress().get());
+                clientRepository.save(client);
+                notificationProducer.sendNotification(rabbit.CLIENT_UPDATE_EXCHANGE, rabbit.CLIENT_UPDATE_KEY,clientUpdateMessageDto );
+                return new ResponseEntity<>(new ResponseDto("Client data updated"), HttpStatus.OK);
+            }
         }
         throw new ClientNotFoundException("Client with email "+ email +" not found");
     }

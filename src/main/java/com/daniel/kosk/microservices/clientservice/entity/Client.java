@@ -11,7 +11,6 @@ import java.util.UUID;
 
 @Entity
 @Data
-@NoArgsConstructor
 public class Client {
 
     @Id

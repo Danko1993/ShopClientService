@@ -11,6 +11,8 @@ import org.springframework.amqp.rabbit.connection.ConnectionFactory;
 public class RabbitMQConfig {
     public static final String USER_SAVED_EXCHANGE = "user_saved_exchange";
     public static final String USER_SAVED_KEY = "user_saved_key";
+    public static final String CLIENT_UPDATE_EXCHANGE = "client_update_exchange";
+    public static final String CLIENT_UPDATE_KEY = "client_update_key";
 
     @Bean
     public MessageConverter jsonMessageConverter() {

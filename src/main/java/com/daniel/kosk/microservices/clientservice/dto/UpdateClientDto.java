@@ -8,7 +8,6 @@ import java.util.Optional;
 
 @JsonInclude(JsonInclude.Include.NON_ABSENT)
 @Data
-@NoArgsConstructor
 public class UpdateClientDto {
     private Optional<String> phoneNumber = Optional.empty();
     private Optional<String> address = Optional.empty();
