@@ -99,4 +99,16 @@ public class ClientDataService {
         }
 
     }
+
+    public ResponseEntity<ApiResponseDto> updateClient(String email, UpdateClientDto updateClientDto) {
+        if (clientRepository.existsByEmail(email)){
+            Client client = clientRepository.findByEmail(email);
+            updateClientDto.getPhoneNumber().ifPresent(client::setPhoneNumber);
+            updateClientDto.getAddress().ifPresent(client::setAddress);
+            clientRepository.save(client);
+            return new ResponseEntity<>(new ResponseDto("Client data updated"), HttpStatus.OK);
+        }
+        throw new ClientNotFoundException("Client with email "+ email +" not found");
+    }
+
 }
